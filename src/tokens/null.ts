@@ -2,15 +2,12 @@ import { StringStream, Token, TokenMatcher, Value } from "../expression.js";
 import Literal from "./literal.js";
 
 export default class Null implements Value {
-    constructor(readonly token: Token) {
+    constructor() {
         
     }
 
-    static anonymous(): Value {
-        return new Null({
-            token: 'null',
-            offset: 0
-        });
+    static fromToken(token: NullToken): Value {
+        return new Null();
     }
 }
 
@@ -22,10 +19,7 @@ export class NullToken extends Literal {
     }
 
     intoValue(): Value {
-        return new Null({
-            token: this.token,
-            offset: this.offset
-        });
+        return Null.fromToken(new NullToken(0));
     }
 }
 

@@ -1,12 +1,14 @@
 import DataSource from "./data.js";
 import Null, {matcher as NullTokenMatcher} from './tokens/null.js';
-import {matcher as NumericTokenMatcher} from './tokens/numeric.js';
+import Numeric, {matcher as NumericTokenMatcher} from './tokens/numeric.js';
 import {matcher as NameTokenMatcher, NameToken} from './tokens/name.js';
 import {Bracket, matcher as BracketTokenMatcher} from './tokens/bracket.js';
-import {matcher as CommaTokenMatcher} from './tokens/comma.js';
+import {CommaToken, matcher as CommaTokenMatcher} from './tokens/comma.js';
 import Operator, {operators} from "./tokens/operator.js";
 import Literal from "./tokens/literal.js";
-import {CommaToken} from "./tokens/comma.js";
+import Fn from "./tokens/fn.js";
+
+const isOnlyValues = (values: (Value | Operator)[]): values is Value[] => !values.some(i => i instanceof Operator);
 
 export default class Expression {
     private readonly postfix_expression: Token[];
@@ -16,7 +18,38 @@ export default class Expression {
     }
 
     evaluate(datasource: DataSource): Value {
-        return Null.anonymous();
+        let stack: (Value | Operator)[] = [];
+
+        for (const tok of this.postfix_expression) {
+            if (tok instanceof Literal)
+                stack.push(tok.intoValue());
+
+            else if (tok instanceof Operator) {
+                let operands = stack.splice(stack.length - tok.operands, tok.operands);
+
+                if (isOnlyValues(operands))
+                    stack.push(tok.apply(operands));
+
+            } else if (tok instanceof NameToken)
+                stack.push(datasource.getNamedValue(tok.token))
+            else if (tok instanceof Bracket && tok.isLeftParenthesis()) {
+                const fn = stack.pop();
+
+                if (fn instanceof Fn) { throw new Error("Not Implemented"); }
+                else throw {
+                    type: `TypeError: Cannot invoke non-function value`,
+                    token: fn
+                };
+            } else throw {
+                type: `SyntaxError: Unhandled token ${tok.token}`,
+                token: tok
+            };
+        }
+
+        if (stack.length == 1 && isValue(stack[0]))
+            return stack[0];
+
+        else return new Null();
     }
 
     private postfix(expression: Token[]): Token[] {
@@ -158,7 +191,11 @@ export class StringStream {
 }
 
 export interface Value {
-    token: Token
+    // token: Token
+}
+
+export function isValue(x: any): x is Value {
+    return x instanceof Numeric || x instanceof Null;
 }
 
 export interface Token {

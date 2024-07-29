@@ -1,4 +1,5 @@
-import { Token, TokenMatcher } from "../expression.js";
+import {Token, TokenMatcher, Value} from "../expression.js";
+import Numeric from "./numeric.js";
 
 export default abstract class Operator implements Token {
     abstract token: string;
@@ -6,126 +7,220 @@ export default abstract class Operator implements Token {
 
     abstract precedence: number;
     abstract associativity: 'left' | 'right';
+
+    abstract operands: number;
+
+    abstract apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
 }
 
 export class AdditionOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = "+";
+    precedence: number = 10;
+    associativity: 'left' | 'right' = "left";
+    operands: number = 2;
 
     constructor(readonly offset: number) {
         super();
-        this.token = "+";
-        this.precedence = 10;
-        this.associativity = "left"
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.add(i));
+
+        throw {
+            type: "TypeError: Operator `add` is not applicable to its operands",
+            operands,
+        };
     }
 }
 export class SubtractionOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = "-";
+    precedence: number = 10;
+    associativity: 'left' | 'right' = "left";
+    operands: number = 2;
 
     constructor(readonly offset: number) {
         super();
-        this.token = "-";
-        this.precedence = 10;
-        this.associativity = "left"
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.sub(i));
+
+        throw {
+            type: "TypeError: Operator `sub` is not applicable to its operands",
+            operands,
+        };
     }
 }
 export class MultiplicationOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = "*";
+    precedence: number = 15;
+    associativity: 'left' | 'right' = "left";
+    operands: number = 2;
 
     constructor(readonly offset: number) {
         super();
-        this.token = "*";
-        this.precedence = 15;
-        this.associativity = "left"
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.mul(i));
+
+        throw {
+            type: "TypeError: Operator `mul` is not applicable to its operands",
+            operands,
+        };
     }
 }
 export class DivisionOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = "/";
+    precedence: number = 15;
+    associativity: 'left' | 'right' = "left";
+    operands: number = 2;
 
     constructor(readonly offset: number) {
         super();
-        this.token = "/";
-        this.precedence = 15;
-        this.associativity = "left"
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.div(i));
+
+        throw {
+            type: "TypeError: Operator `div` is not applicable to its operands",
+            operands,
+        };
     }
 }
 export class ExponentOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = "**";
+    precedence: number = 20;
+    associativity: 'left' | 'right' = "right";
+    operands: number = 2;
 
     constructor(readonly offset: number) {
         super();
-        this.token = "**";
-        this.precedence = 20;
-        this.associativity = "right"
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.power(i));
+
+        throw {
+            type: "TypeError: Operator `pow` is not applicable to its operands",
+            operands,
+        };
     }
 }
 export class LShiftOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = "<<";
+    precedence: number = 5;
+    associativity: 'left' | 'right' = "right";
+    operands: number = 2;
 
     constructor(readonly offset: number) {
         super();
-        this.token = "<<";
-        this.precedence = 5;
-        this.associativity = "right"
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.lshift(i));
+
+        throw {
+            type: "TypeError: Operator `lshift` is not applicable to its operands",
+            operands,
+        };
     }
 }
 export class RShiftOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = ">>";
+    precedence: number = 5;
+    associativity: 'left' | 'right' = "right";
+    operands: number = 2;
 
     constructor(readonly offset: number) {
         super();
-        this.token = ">>";
-        this.precedence = 5;
-        this.associativity = "right"
     }
-}
-export class BitwiseOrOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
 
-    constructor(readonly offset: number) {
-        super();
-        this.token = "|";
-        this.precedence = 1;
-        this.associativity = "right"
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.rshift(i));
+
+        throw {
+            type: "TypeError: Operator `rshift` is not applicable to its operands",
+            operands,
+        };
     }
 }
 export class BitwiseAndOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = "&";
+    precedence: number = 1;
+    associativity: 'left' | 'right' = "right";
+    operands: number = 2;
 
     constructor(readonly offset: number) {
         super();
-        this.token = "&";
-        this.precedence = 1;
-        this.associativity = "right"
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.band(i));
+
+        throw {
+            type: "TypeError: Operator `band` is not applicable to its operands",
+            operands,
+        };
+    }
+}
+export class BitwiseOrOperator extends Operator {
+    token: string = "|";
+    precedence: number = 1;
+    associativity: 'left' | 'right' = "right";
+    operands: number = 2;
+
+    constructor(readonly offset: number) {
+        super();
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce((a, i) => a.bor(i));
+
+        throw {
+            type: "TypeError: Operator `bor` is not applicable to its operands",
+            operands,
+        };
     }
 }
 export class BitwiseNotOperator extends Operator {
-    token: string;
-    precedence: number;
-    associativity: 'left' | 'right';
+    token: string = "~";
+    precedence: number = 1;
+    associativity: 'left' | 'right' = "right";
+    operands: number = 1;
 
     constructor(readonly offset: number) {
         super();
-        this.token = "~";
-        this.precedence = 1;
-        this.associativity = "right"
+    }
+
+    apply<Operands extends Value[], Return extends Value>(operands: Operands): Return;
+    apply(operands: Numeric[]): Numeric {
+        if (operands.every(i => i instanceof Numeric))
+            return (operands as Numeric[]).reduce(a => a.bnot());
+
+        throw {
+            type: "TypeError: Operator `bnot` is not applicable to its operands",
+            operands,
+        };
     }
 }
 

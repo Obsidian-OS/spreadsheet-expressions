@@ -2,6 +2,7 @@ import { Value } from "./expression.js"
 
 export default abstract class DataSource {
     public abstract get(address: Address): Value;
+    public abstract getNamedValue(name: string): Value
 }
 
 export type Address = {
