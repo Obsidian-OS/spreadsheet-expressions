@@ -2,9 +2,10 @@ import DataSource from "./data.js";
 import Null, {matcher as NullTokenMatcher} from './tokens/null.js';
 import Numeric, {matcher as NumericTokenMatcher} from './tokens/numeric.js';
 import {matcher as NameTokenMatcher, NameToken} from './tokens/name.js';
+import {matcher as StrTokenMatcher} from './tokens/str.js';
 import {Bracket, matcher as BracketTokenMatcher} from './tokens/bracket.js';
 import {CommaToken, matcher as CommaTokenMatcher} from './tokens/comma.js';
-import Operator, {operators} from "./tokens/operator.js";
+import Operator, {operators} from "./tokens/operators/operator.js";
 import Literal from "./tokens/literal.js";
 import Fn from "./tokens/fn.js";
 
@@ -139,6 +140,7 @@ export default class Expression {
     static tokens: TokenMatcher<Token>[] = [
         NullTokenMatcher,
         NumericTokenMatcher,
+        StrTokenMatcher,
         NameTokenMatcher,
         BracketTokenMatcher,
         ...operators,
@@ -157,11 +159,6 @@ export class StringStream {
         return this.source.slice(this.offset);
     }
 
-    getNextToken(length: number): string {
-        this.prevOffset = this.offset;
-        return this.source.substring(this.offset, this.offset += length);
-    }
-
     public match<T extends Token>(matcher: RegExp | ((str: string) => string | null), map: (token: string, offset: number) => T | null): T | null {
         const result = matcher instanceof RegExp ? this.peek().match(matcher)?.[0] ?? null : matcher(this.peek());
 
@@ -171,11 +168,7 @@ export class StringStream {
         return map(result, this.offset);
     }
 
-    getMatchedLength(): number {
-        return this.prevOffset;
-    }
-
-    /// Moves the cursor along by n characters, returning the lengthof the stream before
+    /// Moves the cursor along by n characters, returning the length of the stream before
     advanceBy(length: number): number {
         this.prevOffset = this.offset;
         this.offset += length;

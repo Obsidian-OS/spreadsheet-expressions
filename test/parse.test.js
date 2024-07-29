@@ -20,3 +20,19 @@ test("Parse Expression with functions", function() {
 test("Parse Expression with multiple arguments", function() {
     return new expr.Expression("x(1, 2) * n");
 });
+
+test("Parse String", function() {
+    console.log(new expr.Expression(`'hello world'`));
+});
+
+test("Parse String with long delimiters", function() {
+    console.log(new expr.Expression(`"""hello world"""`));
+});
+
+test("Parse String with escapes", function() {
+    console.log(new expr.Expression(`"hello world\\n "`));
+});
+
+test("Parse String with escapes", function() {
+    console.log(new expr.Expression(`"""hello world\\n"""`));
+})
