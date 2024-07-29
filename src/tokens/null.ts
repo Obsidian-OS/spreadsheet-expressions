@@ -29,6 +29,6 @@ export class NullToken extends Literal {
     }
 }
 
-export const matcher: TokenMatcher<NullToken> = function (stream: StringStream): NullToken | null {
+export function matcher(stream: StringStream): NullToken | null {
     return stream.match(/^\s*null/, (tok, offset) => new NullToken(offset));
 }

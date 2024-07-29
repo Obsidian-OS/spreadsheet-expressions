@@ -9,33 +9,33 @@ export default class Numeric implements Value {
         this.data = new Uint8Array();
     }
 
-    add(numeric: Numeric): Numeric {
-
-    }
-
-    sub(numeric: Numeric): Numeric {
-        
-    }
-
-    mul(numeric: Numeric): Numeric {
-        
-    }
-
-    div(numeric: Numeric): Numeric {
-        
-    }
-
-    power(numeric: Numeric): Numeric {
-        
-    }
-
-    lshift(numeric: Numeric): Numeric {
-        
-    }
-
-    rshift(numeric: Numeric): Numeric {
-        
-    }
+    // add(numeric: Numeric): Numeric {
+    //
+    // }
+    //
+    // sub(numeric: Numeric): Numeric {
+    //
+    // }
+    //
+    // mul(numeric: Numeric): Numeric {
+    //
+    // }
+    //
+    // div(numeric: Numeric): Numeric {
+    //
+    // }
+    //
+    // power(numeric: Numeric): Numeric {
+    //
+    // }
+    //
+    // lshift(numeric: Numeric): Numeric {
+    //
+    // }
+    //
+    // rshift(numeric: Numeric): Numeric {
+    //
+    // }
 }
 
 export type NumericType = 'integer' | 'float' | 'scientific' | 'hex' | 'oct' | 'bin';
@@ -53,7 +53,7 @@ export class NumericToken extends Literal {
     }
 }
 
-export const matcher: TokenMatcher<NumericToken> = function (stream: StringStream): NumericToken | null {
+export function matcher(stream: StringStream): NumericToken | null {
     const isValid = (x: any): x is readonly [NumericType, RegExpMatchArray] => !!x[1];
     const format = Object.entries({
         integer: /^[\d_]+/,
@@ -63,7 +63,7 @@ export const matcher: TokenMatcher<NumericToken> = function (stream: StringStrea
         oct: /^0o[0-8_]+/,
         bin: /^0b[0-1_]+/,
     }).map(([key, regex]) => [key, regex.exec(stream.peek())] as [NumericType, RegExpMatchArray])
-    .filter(isValid)[0];
+        .filter(isValid)[0];
 
     if (!format)
         return null;

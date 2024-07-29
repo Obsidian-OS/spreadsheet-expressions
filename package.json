@@ -6,15 +6,16 @@
     "scripts": {
         "build:package": "esbuild src/main.ts --outdir=build --bundle --sourcemap --format=esm",
         "build:package.json": "cat package.json | jq -r '. *  .deploy * {deploy:null} | with_entries(select(.value |. != null))' > build/package.json",
-        "test:all": "find test -iname *.test.js | xargs -d \\\\n -I {} node --enable-source-maps=true test.js {}",
     	"build": "cat package.json | jq -r '.scripts | keys_unsorted[] | select(. | startswith(\"build:\"))' | xargs -d \\\\n -I {} $npm_execpath run {}",
-    	"build_test": "cat package.json | jq -r '.scripts | keys_unsorted[] | select(. | startswith(\"build:\") or startswith(\"test:\"))' | xargs -d \\\\n -I {} $npm_execpath run {}"
+        "test:all": "node --test --enable-source-maps=true",
+        "clean": "rm -rf build node_modules *lock*"
     },
     "devDependencies": {
         "tslib": "latest",
         "esbuild": "latest",
         "chalk": "latest"
     },
+    "types": "build/lib",
     "imports": {
         "#expr": "./build/main.js"
     },

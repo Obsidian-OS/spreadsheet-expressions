@@ -12,10 +12,14 @@
         "allowJs": true,
         "resolveJsonModule": true,
         "forceConsistentCasingInFileNames": true,
+        "rootDir": "src",
         "importHelpers": true,
-        "strict": true
+        "strict": true,
+        "paths": {
+            "#expr": ["./src/main.ts"]
+        }
     },
     "exclude": [
-        "build"
+        "build",
     ]
 }

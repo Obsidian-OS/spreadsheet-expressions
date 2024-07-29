@@ -1,7 +1,12 @@
 import DataSource from "./data.js";
-import Null, { matcher as NullTokenMatcher } from './tokens/null.js';
-import { matcher as NumericTokenMatcher } from './tokens/numeric.js';
-import { operators } from "./tokens/operator.js";
+import Null, {matcher as NullTokenMatcher} from './tokens/null.js';
+import {matcher as NumericTokenMatcher} from './tokens/numeric.js';
+import {matcher as NameTokenMatcher, NameToken} from './tokens/name.js';
+import {Bracket, matcher as BracketTokenMatcher} from './tokens/bracket.js';
+import {matcher as CommaTokenMatcher} from './tokens/comma.js';
+import Operator, {operators} from "./tokens/operator.js";
+import Literal from "./tokens/literal.js";
+import {CommaToken} from "./tokens/comma.js";
 
 export default class Expression {
     private readonly postfix_expression: Token[];
@@ -15,11 +20,65 @@ export default class Expression {
     }
 
     private postfix(expression: Token[]): Token[] {
-        return expression;
+        const output: Token[] = [];
+        const opstack: Token[] = [];
+
+        for (const token of expression)
+            if (token instanceof Literal)
+                output.push(token);
+
+            else if (token instanceof NameToken)
+                opstack.push(token);
+
+            else if (token instanceof Operator) {
+                for (const op of opstack.toReversed()) {
+                    if (!(op instanceof Operator))
+                        break;
+
+                    if (op.precedence > token.precedence || (token.associativity == 'left' && token.precedence == op.precedence)) {
+                        output.push(op);
+                        opstack.pop();
+                    }
+                }
+
+                opstack.push(token);
+            } else if (token instanceof CommaToken)
+                for (const op of opstack.toReversed())
+                    if (op instanceof Bracket && op.isLeftParenthesis())
+                        break;
+                    else
+                        output.push(op);
+            else if (token instanceof Bracket && token.isLeftParenthesis())
+                opstack.push(token);
+
+            else if (token instanceof Bracket && token.isRightParenthesis()) {
+                for (const op of opstack.toReversed()) {
+                    if (op instanceof Bracket && op.isLeftParenthesis())
+                        break;
+
+                    output.push(opstack.pop()!);
+                }
+
+                opstack.pop();
+
+                if (opstack.at(-1)! instanceof NameToken)
+                    output.push(opstack.pop()!);
+            }
+
+        const parenthesis = opstack.find(i => i instanceof Bracket);
+        if (parenthesis)
+            throw {
+                type: "SyntaxError: Bracket Mismatch",
+                token: parenthesis
+            };
+
+        output.push(...opstack.splice(0, opstack.length).reverse());
+
+        return output;
     }
 
     private tokenise(expression: string): Token[] {
-        const stream = new StringStream(expression); 
+        const stream = new StringStream(expression);
         const tokens: Token[] = [];
 
         while (true) {
@@ -31,10 +90,10 @@ export default class Expression {
 
             if (matched.length == 1)
                 tokens.push(matched[0]);
-        
+
             else if (matched.length == 0)
                 break;
-            
+
             else
                 console.log(matched);
 
@@ -47,14 +106,19 @@ export default class Expression {
     static tokens: TokenMatcher<Token>[] = [
         NullTokenMatcher,
         NumericTokenMatcher,
-        ...operators
+        NameTokenMatcher,
+        BracketTokenMatcher,
+        ...operators,
+        CommaTokenMatcher
     ];
 }
 
 export class StringStream {
     offset: number = 0;
     prevOffset: number = 0;
-    constructor(private readonly source: string) {}
+
+    constructor(private readonly source: string) {
+    }
 
     public peek(): string {
         return this.source.slice(this.offset);
@@ -67,7 +131,7 @@ export class StringStream {
 
     public match<T extends Token>(matcher: RegExp | ((str: string) => string | null), map: (token: string, offset: number) => T | null): T | null {
         const result = matcher instanceof RegExp ? this.peek().match(matcher)?.[0] ?? null : matcher(this.peek());
-        
+
         if (!result)
             return null;
 

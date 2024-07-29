@@ -16,8 +16,8 @@ export class AdditionOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "+";
-        this.precedence = 0;
-        this.associativity = "right"
+        this.precedence = 10;
+        this.associativity = "left"
     }
 }
 export class SubtractionOperator extends Operator {
@@ -28,8 +28,8 @@ export class SubtractionOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "-";
-        this.precedence = 0;
-        this.associativity = "right"
+        this.precedence = 10;
+        this.associativity = "left"
     }
 }
 export class MultiplicationOperator extends Operator {
@@ -40,8 +40,8 @@ export class MultiplicationOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "*";
-        this.precedence = 0;
-        this.associativity = "right"
+        this.precedence = 15;
+        this.associativity = "left"
     }
 }
 export class DivisionOperator extends Operator {
@@ -52,8 +52,8 @@ export class DivisionOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "/";
-        this.precedence = 0;
-        this.associativity = "right"
+        this.precedence = 15;
+        this.associativity = "left"
     }
 }
 export class ExponentOperator extends Operator {
@@ -64,7 +64,7 @@ export class ExponentOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "**";
-        this.precedence = 0;
+        this.precedence = 20;
         this.associativity = "right"
     }
 }
@@ -76,7 +76,7 @@ export class LShiftOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "<<";
-        this.precedence = 0;
+        this.precedence = 5;
         this.associativity = "right"
     }
 }
@@ -88,7 +88,7 @@ export class RShiftOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = ">>";
-        this.precedence = 0;
+        this.precedence = 5;
         this.associativity = "right"
     }
 }
@@ -100,7 +100,7 @@ export class BitwiseOrOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "|";
-        this.precedence = 0;
+        this.precedence = 1;
         this.associativity = "right"
     }
 }
@@ -112,7 +112,7 @@ export class BitwiseAndOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "&";
-        this.precedence = 0;
+        this.precedence = 1;
         this.associativity = "right"
     }
 }
@@ -124,7 +124,7 @@ export class BitwiseNotOperator extends Operator {
     constructor(readonly offset: number) {
         super();
         this.token = "~";
-        this.precedence = 0;
+        this.precedence = 1;
         this.associativity = "right"
     }
 }
