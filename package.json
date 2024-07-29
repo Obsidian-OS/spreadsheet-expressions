@@ -1,0 +1,28 @@
+{
+    "name": "spreadsheet-language",
+    "description": "The scripting language which powers the Obsidian Spreadsheet tool",
+    "type": "module",
+    "main": "src/main.ts",
+    "scripts": {
+        "build:package": "esbuild src/main.ts --outdir=build --bundle --sourcemap --format=esm",
+        "build:package.json": "cat package.json | jq -r '. *  .deploy * {deploy:null} | with_entries(select(.value |. != null))' > build/package.json",
+        "test:all": "find test -iname *.test.js | xargs -d \\\\n -I {} node --enable-source-maps=true test.js {}",
+    	"build": "cat package.json | jq -r '.scripts | keys_unsorted[] | select(. | startswith(\"build:\"))' | xargs -d \\\\n -I {} $npm_execpath run {}",
+    	"build_test": "cat package.json | jq -r '.scripts | keys_unsorted[] | select(. | startswith(\"build:\") or startswith(\"test:\"))' | xargs -d \\\\n -I {} $npm_execpath run {}"
+    },
+    "devDependencies": {
+        "tslib": "latest",
+        "esbuild": "latest",
+        "chalk": "latest"
+    },
+    "imports": {
+        "#expr": "./build/main.js"
+    },
+    "deploy": {
+        "main": "./main.js",
+        "imports": {
+            "#expr": "./main.js"
+        },
+        "scripts": {}
+    }
+}

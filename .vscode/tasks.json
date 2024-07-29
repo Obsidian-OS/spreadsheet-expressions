@@ -1,0 +1,46 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": false,
+				"reveal": "silent",
+				"focus": true,
+				"panel": "dedicated",
+				"showReuseMessage": false,
+				"clear": true
+			},
+			"problemMatcher": [
+				"$esbuild"
+			],
+			"label": "npm: build",
+			"detail": "cat package.json | jq -r '.scripts | keys_unsorted[] | select(. | startswith(\"build:\"))' | xargs -d \\\\n -I {} $npm_execpath run {}"
+		},
+		{
+			"type": "npm",
+			"script": "test:all",
+			"problemMatcher": [],
+			"dependsOn": ["npm: build"],
+			"label": "npm: test:all",
+			"detail": "find test -iname *.test.js | xargs -d \\\\n -I {} node --enable-source-maps=true test.js {}",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": false,
+				"reveal": "silent",
+				"focus": true,
+				"panel": "dedicated",
+				"showReuseMessage": false,
+				"clear": true
+			}
+		}
+	]
+}
