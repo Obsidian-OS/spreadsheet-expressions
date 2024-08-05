@@ -12,3 +12,5 @@ export { default as Operator } from './tokens/operators/operator.js';
 export { default as Null } from './tokens/null.js';
 
 export { default as RandomDataSource } from './source.js'
+
+export * as lib from './lib.js';

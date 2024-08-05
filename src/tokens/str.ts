@@ -5,8 +5,8 @@ export default class Str implements Value {
 }
 
 export class StrToken implements Token {
-    constructor(readonly token: string, readonly offset: number) {
-
+    constructor(readonly token: string, readonly str: string, readonly offset: number) {
+        console.log({token, str});
     }
 }
 
@@ -19,7 +19,7 @@ export function* peekable<T>(iterator: Iterable<T>): Generator<{ current: T, ski
 export function matcher(stream: StringStream): StrToken | null {
     let tok = stream.peek();
 
-    const delimiter = ['"', '\'', '`', '´', "'''", '"""']
+    const delimiter = ['"', '\'', '`', '´']
         .filter(i => tok.startsWith(i))
         .reduce((a: string, i: string) => a.length > i.length ? a : i, '');
 
@@ -27,14 +27,12 @@ export function matcher(stream: StringStream): StrToken | null {
         return null;
 
     let body = '';
-    let count_since_escape = 0;
 
-    for (const { current: char, skip } of peekable(tok)) {
+    for (const { current: [a, char], skip } of peekable(Object.entries(tok))) {
         if (char == "\\") {
-            count_since_escape = 0;
-            const next = skip();
+            const next = skip()[1];
 
-            const map = ({
+            const map: Record<string, string> = {
                 '\\': '\\',
                 '\'': '\'',
                 '\"': '\"',
@@ -46,15 +44,15 @@ export function matcher(stream: StringStream): StrToken | null {
                 'b': '\b',
                 'v': '\v',
                 '0': '\0',
-            })[next];
+            };
 
-            if (map)
-                body += map;
+            if (next in map)
+                body += map[next as string];
             else if (next == 'u' || next == 'U') {
                 let codePoint = 0;
 
                 let char;
-                while (/^\d$/.test(char = skip()))
+                while (/^\d$/.test(char = skip()[1]))
                     codePoint += 10 + Number(char);
 
                 body += char;
@@ -62,13 +60,9 @@ export function matcher(stream: StringStream): StrToken | null {
                 body += next;
         } else {
             body += char;
-            count_since_escape += 1;
-        }
 
-        console.log({ body, delimiter });
-        if (body.endsWith(delimiter) && count_since_escape >= delimiter.length && body.length >= 2 * delimiter.length) {
-            console.log("Terminating", { body, delimiter });
-            return new StrToken(body, stream.offset);
+            if (body.endsWith(delimiter) && body.length > delimiter.length)
+                return new StrToken(tok.slice(0, Number(a) + 1), body.slice(delimiter.length, 0 - delimiter.length), stream.offset);
         }
     }
 

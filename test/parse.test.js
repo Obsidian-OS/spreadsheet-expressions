@@ -25,14 +25,10 @@ test("Parse String", function() {
     console.log(new expr.Expression(`'hello world'`));
 });
 
-test("Parse String with long delimiters", function() {
-    console.log(new expr.Expression(`"""hello world"""`));
+test("Parse String with escapes", function() {
+    console.log(new expr.Expression(`"hello world\\n"`));
 });
 
-test("Parse String with escapes", function() {
-    console.log(new expr.Expression(`"hello world\\n "`));
-});
-
-test("Parse String with escapes", function() {
-    console.log(new expr.Expression(`"""hello world\\n"""`));
+test("Parse String with an escaped quote", function() {
+    console.log(new expr.Expression(`"hello world\\""`));
 })
